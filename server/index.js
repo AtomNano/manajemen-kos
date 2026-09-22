@@ -3,6 +3,9 @@ const cors = require('cors');
 const path = require('path');
 const os = require('os');
 
+const { authMiddleware } = require('./middleware/auth');
+const authRoute = require('./routes/auth');
+const publicRoute = require('./routes/public');
 const roomsRoute = require('./routes/rooms');
 const tenantsRoute = require('./routes/tenants');
 const paymentsRoute = require('./routes/payments');
@@ -18,7 +21,12 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// API Routes
+// 1. Public API routes (No auth required)
+app.use('/api/public', publicRoute);
+app.use('/api/auth', authRoute);
+
+// 2. Protected Admin API routes (Protected by authMiddleware)
+app.use('/api', authMiddleware);
 app.use('/api/rooms', roomsRoute);
 app.use('/api/tenants', tenantsRoute);
 app.use('/api/payments', paymentsRoute);

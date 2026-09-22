@@ -11,7 +11,9 @@ import {
   X,
   Phone,
   Calendar,
-  Layers
+  Layers,
+  Copy,
+  MessageCircle
 } from 'lucide-react';
 import { formatRupiah, formatDate } from '../utils/formatters';
 
@@ -25,6 +27,7 @@ export default function RoomManager({
   const [filterStatus, setFilterStatus] = useState('ALL');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRoom, setEditingRoom] = useState(null);
+  const [copiedRoomId, setCopiedRoomId] = useState(null);
   const [formData, setFormData] = useState({
     room_number: '',
     name: '',
@@ -37,6 +40,25 @@ export default function RoomManager({
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  const getFormUrl = (room) => {
+    return `${window.location.origin}/daftar/${room.id}`;
+  };
+
+  const handleCopyFormLink = (room) => {
+    const url = getFormUrl(room);
+    navigator.clipboard.writeText(url);
+    setCopiedRoomId(room.id);
+    setTimeout(() => setCopiedRoomId(null), 2000);
+  };
+
+  const handleShareFormWA = (room) => {
+    const url = getFormUrl(room);
+    const text = encodeURIComponent(
+      `Halo Kak! Silakan isi formulir pendaftaran sewa kos untuk *${room.room_number}* (${formatRupiah(room.price)}/bln) di tautan berikut:\n\n👉 ${url}\n\nSetelah diisi, data akan langsung tercatat dan kamar akan diamankan untuk Kakak. Terima kasih! 🙏😊`
+    );
+    window.open(`https://wa.me/?text=${text}`, '_blank');
+  };
 
   const floors = Array.from(new Set(rooms.map((r) => r.floor))).sort((a, b) => a - b);
 
@@ -296,12 +318,29 @@ export default function RoomManager({
                     Detail Penghuni
                   </button>
                 ) : (
-                  <button
-                    onClick={() => onOpenCheckInWithRoom(room.id)}
-                    className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors"
-                  >
-                    + Check-In Kamar
-                  </button>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => handleCopyFormLink(room)}
+                      title="Salin Link Formulir Pendaftaran Mandiri"
+                      className="p-1.5 text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg border border-slate-200 transition-colors flex items-center gap-1 text-[11px] font-bold"
+                    >
+                      <Copy className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>{copiedRoomId === room.id ? 'Tersalin!' : 'Link Form'}</span>
+                    </button>
+                    <button
+                      onClick={() => handleShareFormWA(room)}
+                      title="Kirim Link Form via WhatsApp ke Calon Penghuni"
+                      className="p-1.5 text-emerald-700 hover:bg-emerald-100 rounded-lg bg-emerald-50 border border-emerald-200 transition-colors"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => onOpenCheckInWithRoom(room.id)}
+                      className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors"
+                    >
+                      + Isi Manual
+                    </button>
+                  </div>
                 )}
               </div>
             </div>

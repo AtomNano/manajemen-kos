@@ -7,7 +7,8 @@ import {
   MessageSquare, 
   Smartphone, 
   CheckCircle, 
-  AlertCircle 
+  AlertCircle,
+  Lock
 } from 'lucide-react';
 
 export default function SettingsModal({ onUpdateKosName }) {
@@ -226,7 +227,32 @@ export default function SettingsModal({ onUpdateKosName }) {
           />
         </div>
 
-        {/* Card 4: Panduan Akses Jaringan Lokal (Wi-Fi Rumah) */}
+        {/* Card 4: Keamanan & PIN Pengelola */}
+        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+            <Lock className="w-4 h-4 text-emerald-600" />
+            Keamanan & PIN Pengelola Kos
+          </h3>
+          <p className="text-xs text-slate-500">
+            PIN ini digunakan untuk mengunci dashboard manajemen agar hanya Anda yang dapat mengakses data kamar, penghuni, dan keuangan. Calon penghuni kos yang membuka form pendaftaran mandiri tidak akan melihat panel ini.
+          </p>
+
+          <div className="max-w-xs">
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              PIN Pengelola (Angka/Karakter)
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="Contoh: 1234"
+              value={settings.pin || ''}
+              onChange={(e) => setSettings({ ...settings, pin: e.target.value })}
+              className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm font-mono tracking-widest font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+            />
+          </div>
+        </div>
+
+        {/* Card 5: Panduan Akses Jaringan Lokal (Wi-Fi Rumah) */}
         <div className="bg-blue-50/70 p-6 rounded-2xl border border-blue-200 space-y-3">
           <h3 className="text-sm font-bold text-blue-900 flex items-center gap-2">
             <Wifi className="w-4 h-4 text-blue-600" />

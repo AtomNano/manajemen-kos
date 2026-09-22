@@ -44,11 +44,19 @@ function initDb() {
       rent_price INTEGER NOT NULL DEFAULT 0,
       deposit INTEGER NOT NULL DEFAULT 0,
       status TEXT CHECK(status IN ('aktif', 'keluar')) DEFAULT 'aktif',
+      is_self_registered INTEGER DEFAULT 0,
       notes TEXT DEFAULT '',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE RESTRICT
     );
   `);
+
+  // Migrate tenants table if is_self_registered column doesn't exist
+  try {
+    db.prepare('ALTER TABLE tenants ADD COLUMN is_self_registered INTEGER DEFAULT 0').run();
+  } catch (e) {
+    // Column already exists, ignore
+  }
 
   // 3. Table Payments
   db.exec(`
@@ -72,7 +80,7 @@ function initDb() {
   db.exec(`
     CREATE TABLE IF NOT EXISTS logs (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      event_type TEXT NOT NULL, -- CHECK_IN, CHECK_OUT, PAYMENT, ROOM_UPDATE, TENANT_UPDATE, SYSTEM
+      event_type TEXT NOT NULL, -- CHECK_IN, CHECK_OUT, PAYMENT, ROOM_UPDATE, TENANT_UPDATE, SYSTEM, SELF_REGISTER
       description TEXT NOT NULL,
       tenant_id INTEGER,
       room_id INTEGER,
@@ -84,17 +92,24 @@ function initDb() {
   db.exec(`
     CREATE TABLE IF NOT EXISTS settings (
       id INTEGER PRIMARY KEY CHECK (id = 1),
-      kos_name TEXT NOT NULL DEFAULT 'Kos Berkah',
+      kos_name TEXT NOT NULL DEFAULT 'Kos Berkah Mandiri',
       owner_name TEXT NOT NULL DEFAULT 'Pengelola Kos',
-      owner_phone TEXT NOT NULL DEFAULT '',
+      owner_phone TEXT NOT NULL DEFAULT '08123456789',
       bank_name TEXT NOT NULL DEFAULT 'BCA',
       bank_account_number TEXT NOT NULL DEFAULT '1234567890',
       bank_account_name TEXT NOT NULL DEFAULT 'Nama Pemilik',
       reminder_template TEXT NOT NULL,
-      pin TEXT DEFAULT '',
+      pin TEXT DEFAULT '1234',
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `);
+
+  // Migrate settings table if pin column doesn't exist
+  try {
+    db.prepare("ALTER TABLE settings ADD COLUMN pin TEXT DEFAULT '1234'").run();
+  } catch (e) {
+    // Column already exists, ignore
+  }
 
   // Seed default 7 rooms if table is empty
   const roomCount = db.prepare('SELECT COUNT(*) as count FROM rooms').get().count;
@@ -134,8 +149,8 @@ function initDb() {
     const defaultReminder = `Halo Kak {NAMA_PENGHUNI} ({NOMOR_KAMAR}),\n\nSekadar mengingatkan untuk pembayaran sewa kos periode bulan ini yang jatuh tempo pada tanggal *{TANGGAL_JATUH_TEMPO}* sebesar *{NOMINAL_SEWA}*.\n\nPembayaran dapat ditransfer ke:\n🏦 Bank: *{NAMA_BANK}*\n💳 No. Rekening: *{NOMOR_REKENING}*\n👤 Atas Nama: *{ATAS_NAMA}*\n\nJika sudah melakukan transfer, mohon kirimkan bukti pembayarannya ya Kak. Terima kasih banyak! 🙏😊\n\nSalam,\n*{NAMA_KOS}*`;
 
     db.prepare(`
-      INSERT INTO settings (id, kos_name, owner_name, owner_phone, bank_name, bank_account_number, bank_account_name, reminder_template)
-      VALUES (1, 'Kos Berkah Mandiri', 'Pengelola Kos', '08123456789', 'BCA', '1234567890', 'Pemilik Kos', ?)
+      INSERT INTO settings (id, kos_name, owner_name, owner_phone, bank_name, bank_account_number, bank_account_name, reminder_template, pin)
+      VALUES (1, 'Kos Berkah Mandiri', 'Pengelola Kos', '08123456789', 'BCA', '1234567890', 'Pemilik Kos', ?, '1234')
     `).run(defaultReminder);
   }
 }

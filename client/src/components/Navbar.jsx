@@ -1,7 +1,7 @@
 import React from 'react';
-import { Home, BedDouble, Users, CreditCard, Clock, Settings, UserPlus } from 'lucide-react';
+import { Home, BedDouble, Users, CreditCard, Clock, Settings, UserPlus, Lock } from 'lucide-react';
 
-export default function Navbar({ activeTab, setActiveTab, onOpenCheckIn, kosName }) {
+export default function Navbar({ activeTab, setActiveTab, onOpenCheckIn, kosName, onLogout }) {
   const navItems = [
     { id: 'dashboard', label: 'Ringkasan', icon: Home },
     { id: 'rooms', label: 'Kamar', icon: BedDouble },
@@ -50,16 +50,26 @@ export default function Navbar({ activeTab, setActiveTab, onOpenCheckIn, kosName
             })}
           </nav>
 
-          {/* Quick Check-in Button */}
+          {/* Quick Check-in Button & Lock Button */}
           <div className="flex items-center gap-2">
             <button
               onClick={onOpenCheckIn}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg shadow-sm shadow-emerald-300 transition-all hover:shadow active:scale-95"
+              className="inline-flex items-center gap-2 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-medium rounded-lg shadow-sm shadow-emerald-300 transition-all hover:shadow active:scale-95"
             >
               <UserPlus className="w-4 h-4" />
               <span className="hidden sm:inline">+ Pengekos Baru</span>
               <span className="sm:hidden">Masuk</span>
             </button>
+
+            {onLogout && (
+              <button
+                onClick={onLogout}
+                title="Kunci Akses Admin (Logout)"
+                className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors border border-slate-200"
+              >
+                <Lock className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </div>
 

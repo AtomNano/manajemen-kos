@@ -8,9 +8,52 @@ import ActivityLogs from './components/ActivityLogs';
 import SettingsModal from './components/SettingsModal';
 import CheckInModal from './components/CheckInModal';
 import PaymentModal from './components/PaymentModal';
+import PublicTenantForm from './components/PublicTenantForm';
+import AdminAuthGuard from './components/AdminAuthGuard';
 import { CheckCircle, AlertCircle } from 'lucide-react';
 
+// Setup fetch interceptor to attach Admin Token
+if (typeof window !== 'undefined') {
+  const originalFetch = window.fetch;
+  window.fetch = async (...args) => {
+    let [resource, config = {}] = args;
+    const token = localStorage.getItem('kos_admin_token') || sessionStorage.getItem('kos_admin_token');
+    if (
+      token &&
+      typeof resource === 'string' &&
+      resource.startsWith('/api') &&
+      !resource.startsWith('/api/public') &&
+      !resource.startsWith('/api/auth/login')
+    ) {
+      config.headers = {
+        ...(config.headers || {}),
+        Authorization: `Bearer ${token}`,
+      };
+    }
+    return originalFetch(resource, config);
+  };
+}
+
 export default function App() {
+  // Check if current route is a public tenant registration form
+  const [publicRoomId, setPublicRoomId] = useState(() => {
+    const path = window.location.pathname;
+    const searchParams = new URLSearchParams(window.location.search);
+    if (path.startsWith('/daftar/')) {
+      return path.replace('/daftar/', '').split('/')[0];
+    }
+    if (path.startsWith('/form/')) {
+      return path.replace('/form/', '').split('/')[0];
+    }
+    if (searchParams.get('daftar')) {
+      return searchParams.get('daftar');
+    }
+    if (searchParams.get('kamar')) {
+      return searchParams.get('kamar');
+    }
+    return null;
+  });
+
   const [activeTab, setActiveTab] = useState('dashboard');
   const [stats, setStats] = useState(null);
   const [rooms, setRooms] = useState([]);
@@ -66,8 +109,24 @@ export default function App() {
   };
 
   useEffect(() => {
-    loadData();
-  }, []);
+    // Only load admin data if not in public registration mode
+    if (!publicRoomId) {
+      loadData();
+    }
+  }, [publicRoomId]);
+
+  // If public registration route is active, render the public form directly
+  if (publicRoomId) {
+    return (
+      <PublicTenantForm
+        roomId={publicRoomId}
+        onBackToAdmin={() => {
+          window.history.pushState({}, '', '/');
+          setPublicRoomId(null);
+        }}
+      />
+    );
+  }
 
   const handleOpenCheckInWithRoom = (roomId) => {
     setCheckInRoomId(roomId);
@@ -92,10 +151,76 @@ export default function App() {
     }
   };
 
-  const handleOpenTenantDetailFromRoom = (tenantId) => {
+  const handleOpenTenantDetailFromRoom = () => {
     setActiveTab('tenants');
   };
 
+  return (
+    <AdminAuthGuard
+      kosName={kosName}
+      onOpenPublicDemo={() => {
+        window.history.pushState({}, '', '/daftar/1');
+        setPublicRoomId('1');
+      }}
+    >
+      <AdminDashboardView
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        kosName={kosName}
+        setKosName={setKosName}
+        stats={stats}
+        rooms={rooms}
+        dues={dues}
+        recentLogs={recentLogs}
+        toast={toast}
+        showToast={showToast}
+        loadData={loadData}
+        isCheckInOpen={isCheckInOpen}
+        setIsCheckInOpen={setIsCheckInOpen}
+        checkInRoomId={checkInRoomId}
+        setCheckInRoomId={setCheckInRoomId}
+        isPaymentOpen={isPaymentOpen}
+        setIsPaymentOpen={setIsPaymentOpen}
+        paymentTenant={paymentTenant}
+        setPaymentTenant={setPaymentTenant}
+        handleOpenCheckInWithRoom={handleOpenCheckInWithRoom}
+        handleOpenCheckInGeneral={handleOpenCheckInGeneral}
+        handleOpenPayment={handleOpenPayment}
+        handleSelectRoomFromGrid={handleSelectRoomFromGrid}
+        handleOpenTenantDetailFromRoom={handleOpenTenantDetailFromRoom}
+      />
+    </AdminAuthGuard>
+  );
+}
+
+// Inner Admin Dashboard View (rendered after passing Admin PIN Gatekeeper)
+function AdminDashboardView({
+  activeTab,
+  setActiveTab,
+  kosName,
+  setKosName,
+  stats,
+  rooms,
+  dues,
+  recentLogs,
+  toast,
+  showToast,
+  loadData,
+  isCheckInOpen,
+  setIsCheckInOpen,
+  checkInRoomId,
+  setCheckInRoomId,
+  isPaymentOpen,
+  setIsPaymentOpen,
+  paymentTenant,
+  setPaymentTenant,
+  handleOpenCheckInWithRoom,
+  handleOpenCheckInGeneral,
+  handleOpenPayment,
+  handleSelectRoomFromGrid,
+  handleOpenTenantDetailFromRoom,
+  onLogout,
+}) {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans selection:bg-emerald-100 selection:text-emerald-900">
       {/* Navigation */}
@@ -104,6 +229,7 @@ export default function App() {
         setActiveTab={setActiveTab}
         onOpenCheckIn={handleOpenCheckInGeneral}
         kosName={kosName}
+        onLogout={onLogout}
       />
 
       {/* Global Toast */}
@@ -206,7 +332,7 @@ export default function App() {
       <footer className="border-t border-slate-200 bg-white py-4 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center text-xs text-slate-400">
           <p>
-            {kosName} • Sistem Manajemen Kos Lokal Offline & Wi-Fi Ready • {new Date().getFullYear()}
+            {kosName} • Sistem Manajemen Kos (Protected Admin Panel & Public Tenant Forms)
           </p>
         </div>
       </footer>
