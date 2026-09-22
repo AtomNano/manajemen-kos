@@ -73,7 +73,8 @@ app.get('*', (req, res) => {
   });
 });
 
-app.listen(PORT, '0.0.0.0', () => {
+const HOST = process.env.HOST || '127.0.0.1';
+app.listen(PORT, HOST, () => {
   const localIp = getLocalIp();
   console.log(`====================================================`);
   console.log(`🏡 SISTEM MANAJEMEN KOS AKTIF`);

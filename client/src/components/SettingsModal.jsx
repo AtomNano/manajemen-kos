@@ -244,7 +244,7 @@ export default function SettingsModal({ onUpdateKosName }) {
             <input
               type="text"
               required
-              placeholder="Contoh: 1234"
+              placeholder="Masukkan PIN Baru"
               value={settings.pin || ''}
               onChange={(e) => setSettings({ ...settings, pin: e.target.value })}
               className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm font-mono tracking-widest font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-none"

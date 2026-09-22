@@ -129,15 +129,12 @@ export default function AdminAuthGuard({ children, kosName, onOpenPublicDemo }) 
                 type="password"
                 required
                 autoFocus
-                placeholder="PIN Bawaan: 1234"
+                placeholder="••••••••"
                 value={pin}
                 onChange={(e) => setPin(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 text-base tracking-widest font-mono text-center focus:ring-2 focus:ring-emerald-500 focus:outline-none"
               />
             </div>
-            <p className="text-[11px] text-slate-400 text-center mt-1">
-              (PIN bawaan awal adalah: <b>1234</b>, dapat diubah di Pengaturan)
-            </p>
           </div>
 
           <div className="flex items-center gap-2 pt-1">
