@@ -24,11 +24,12 @@ function verifyToken(token) {
 }
 
 function authMiddleware(req, res, next) {
+  const url = req.originalUrl || req.url || '';
   // Allow public paths through
   if (
-    req.path.startsWith('/api/public') ||
-    req.path.startsWith('/api/auth/login') ||
-    !req.path.startsWith('/api')
+    url.startsWith('/api/public') ||
+    url.startsWith('/api/auth/login') ||
+    !url.startsWith('/api')
   ) {
     return next();
   }
