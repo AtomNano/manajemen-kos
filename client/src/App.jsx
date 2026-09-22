@@ -10,6 +10,7 @@ import CheckInModal from './components/CheckInModal';
 import PaymentModal from './components/PaymentModal';
 import PublicTenantForm from './components/PublicTenantForm';
 import AdminAuthGuard from './components/AdminAuthGuard';
+import PublicLanding from './components/PublicLanding';
 import { CheckCircle, AlertCircle } from 'lucide-react';
 
 // Setup fetch interceptor to attach Admin Token
@@ -53,6 +54,43 @@ export default function App() {
     }
     return null;
   });
+
+  const [isAdminRoute, setIsAdminRoute] = useState(() => {
+    const path = window.location.pathname;
+    const searchParams = new URLSearchParams(window.location.search);
+    return (
+      path.startsWith('/admin') ||
+      path.startsWith('/kelola') ||
+      searchParams.get('admin') === '1' ||
+      Boolean(localStorage.getItem('kos_admin_token') || sessionStorage.getItem('kos_admin_token'))
+    );
+  });
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const path = window.location.pathname;
+      const searchParams = new URLSearchParams(window.location.search);
+      if (path.startsWith('/daftar/')) {
+        setPublicRoomId(path.replace('/daftar/', '').split('/')[0]);
+      } else if (path.startsWith('/form/')) {
+        setPublicRoomId(path.replace('/form/', '').split('/')[0]);
+      } else if (searchParams.get('daftar')) {
+        setPublicRoomId(searchParams.get('daftar'));
+      } else {
+        setPublicRoomId(null);
+      }
+
+      setIsAdminRoute(
+        path.startsWith('/admin') ||
+        path.startsWith('/kelola') ||
+        searchParams.get('admin') === '1' ||
+        Boolean(localStorage.getItem('kos_admin_token') || sessionStorage.getItem('kos_admin_token'))
+      );
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   const [activeTab, setActiveTab] = useState('dashboard');
   const [stats, setStats] = useState(null);
@@ -128,6 +166,22 @@ export default function App() {
     );
   }
 
+  // If on public root URL (not on /admin or /kelola), render discreet public landing
+  if (!isAdminRoute) {
+    return (
+      <PublicLanding
+        kosInfo={{
+          kos_name: kosName,
+          owner_phone: stats?.owner_phone || '08123456789'
+        }}
+        onGoToAdmin={() => {
+          window.history.pushState({}, '', '/admin');
+          setIsAdminRoute(true);
+        }}
+      />
+    );
+  }
+
   const handleOpenCheckInWithRoom = (roomId) => {
     setCheckInRoomId(roomId);
     setIsCheckInOpen(true);
@@ -158,9 +212,9 @@ export default function App() {
   return (
     <AdminAuthGuard
       kosName={kosName}
-      onOpenPublicDemo={() => {
-        window.history.pushState({}, '', '/daftar/1');
-        setPublicRoomId('1');
+      onBackToPublic={() => {
+        window.history.pushState({}, '', '/');
+        setIsAdminRoute(false);
       }}
     >
       <AdminDashboardView

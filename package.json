@@ -7,6 +7,7 @@
     "start": "node server/index.js",
     "dev:server": "node --watch server/index.js",
     "build": "npm run build --prefix client",
+    "reset-pin": "node server/reset-pin.js",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev --prefix client\""
   },
   "dependencies": {

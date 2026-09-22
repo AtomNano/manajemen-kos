@@ -8,3 +8,4 @@ client/dist
 Thumbs.db
 server/*.sqlite-shm
 server/*.sqlite-wal
+server/*.sqlite

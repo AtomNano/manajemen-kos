@@ -77,4 +77,43 @@ router.get('/verify', (req, res) => {
   return res.status(401).json({ success: false, authenticated: false });
 });
 
+// POST /api/auth/emergency-reset
+router.post('/emergency-reset', (req, res) => {
+  const { recovery_key, new_pin } = req.body;
+  if (!recovery_key || !new_pin) {
+    return res.status(400).json({ success: false, error: 'Kunci Pemulihan dan PIN Baru wajib diisi' });
+  }
+
+  try {
+    const settings = db.prepare('SELECT recovery_key FROM settings WHERE id = 1').get();
+    const correctKey = (settings && settings.recovery_key) ? String(settings.recovery_key).trim() : 'KOS-PUTRA-9988';
+
+    if (String(recovery_key).trim().toUpperCase() !== correctKey.toUpperCase()) {
+      return res.status(401).json({ success: false, error: 'Kunci Pemulihan Darurat tidak cocok / salah' });
+    }
+
+    if (String(new_pin).trim().length < 4) {
+      return res.status(400).json({ success: false, error: 'PIN Baru minimal 4 karakter' });
+    }
+
+    // Update PIN in database
+    db.prepare('UPDATE settings SET pin = ? WHERE id = 1').run(String(new_pin).trim());
+
+    // Clear all lockout attempts
+    loginAttempts.clear();
+
+    const { token, expiresAt } = generateToken();
+    res.json({
+      success: true,
+      message: 'Akses dan PIN berhasil dipulihkan secara instan!',
+      token,
+      expiresAt
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 module.exports = router;
+module.exports.clearLockouts = () => loginAttempts.clear();
+

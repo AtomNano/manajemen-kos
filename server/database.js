@@ -111,6 +111,13 @@ function initDb() {
     // Column already exists, ignore
   }
 
+  // Migrate settings table if recovery_key column doesn't exist
+  try {
+    db.prepare("ALTER TABLE settings ADD COLUMN recovery_key TEXT DEFAULT 'KOS-PUTRA-9988'").run();
+  } catch (e) {
+    // Column already exists, ignore
+  }
+
   // Seed default 7 rooms if table is empty
   const roomCount = db.prepare('SELECT COUNT(*) as count FROM rooms').get().count;
   if (roomCount === 0) {

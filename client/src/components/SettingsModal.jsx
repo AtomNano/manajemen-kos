@@ -237,18 +237,56 @@ export default function SettingsModal({ onUpdateKosName }) {
             PIN ini digunakan untuk mengunci dashboard manajemen agar hanya Anda yang dapat mengakses data kamar, penghuni, dan keuangan. Calon penghuni kos yang membuka form pendaftaran mandiri tidak akan melihat panel ini.
           </p>
 
-          <div className="max-w-xs">
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
-              PIN Pengelola (Angka/Karakter)
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="Masukkan PIN Baru"
-              value={settings.pin || ''}
-              onChange={(e) => setSettings({ ...settings, pin: e.target.value })}
-              className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm font-mono tracking-widest font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                PIN Pengelola (Angka/Karakter)
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="Masukkan PIN Baru"
+                value={settings.pin || ''}
+                onChange={(e) => setSettings({ ...settings, pin: e.target.value })}
+                className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm font-mono tracking-widest font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Kunci Pemulihan Darurat (Master Key)
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="Contoh: KOS-PUTRA-9988"
+                value={settings.recovery_key || ''}
+                onChange={(e) => setSettings({ ...settings, recovery_key: e.target.value })}
+                className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm font-mono tracking-wider font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+              />
+              <p className="text-[11px] text-slate-400 mt-1">
+                Kunci rahasia untuk membuka blokir jika lupa PIN atau terkunci.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 5: Panduan Aplikasi HP (PWA) & Tautan Akses */}
+        <div className="bg-emerald-50/70 p-6 rounded-2xl border border-emerald-200 space-y-3">
+          <h3 className="text-sm font-bold text-emerald-900 flex items-center gap-2">
+            <Smartphone className="w-4 h-4 text-emerald-600" />
+            Aplikasi HP (PWA) & Jalur Akses Aman
+          </h3>
+          <p className="text-xs text-emerald-800 leading-relaxed">
+            Sistem ini dapat dipasang ke layar utama HP Anda sebagai aplikasi mandiri tanpa perlu download dari PlayStore/AppStore:
+          </p>
+          <div className="space-y-2 text-xs text-emerald-900 bg-white/80 p-4 rounded-xl border border-emerald-200">
+            <p><b>📱 Pasang di Android (Chrome/Edge)</b>: Buka tautan admin, ketuk menu titik tiga (⋮) di kanan atas ➔ pilih <b>"Instal Aplikasi"</b> atau <b>"Tambahkan ke Layar Utama"</b>.</p>
+            <p><b>🍏 Pasang di iPhone (Safari)</b>: Buka tautan admin di Safari, ketuk tombol <b>Share</b> (kotak panah ke atas) ➔ pilih <b>"Add to Home Screen"</b>.</p>
+            <div className="pt-2 border-t border-emerald-100 text-[11px] text-slate-600">
+              <p>🔗 <b>Tautan Publik</b>: <code>https://kosputra.luthfiserver.site/</code> (Hanya info pendaftaran tertutup)</p>
+              <p>🔐 <b>Tautan Khusus Pengelola</b>: <code>https://kosputra.luthfiserver.site/admin</code></p>
+            </div>
           </div>
         </div>
 
