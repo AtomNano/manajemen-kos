@@ -1,0 +1,10 @@
+node_modules
+client/node_modules
+dist
+client/dist
+*.log
+.env
+.DS_Store
+Thumbs.db
+server/*.sqlite-shm
+server/*.sqlite-wal

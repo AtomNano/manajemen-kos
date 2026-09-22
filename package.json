@@ -1,0 +1,20 @@
+{
+  "name": "kos-app",
+  "version": "1.0.0",
+  "description": "Sistem Manajemen Kos Lokal",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev:server": "node --watch server/index.js",
+    "build": "npm run build --prefix client",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev --prefix client\""
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.8.1",
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
